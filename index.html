@@ -32,7 +32,7 @@
     position: fixed;
     inset: 0;
     z-index: 0;
-    background-image: url('https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExM3UybXl3cnVwbHNvNXBzMzBkZm14Ynp0djF1Mnl1ZGJ5Zm44anI0ciZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/sxwk9hGlsULcYm6hDX/giphy.gif');
+    background-image: url('background.gif');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -238,40 +238,106 @@
     box-shadow: 0 6px 16px rgba(0,0,0,0.2);
   }
 
-  /* Music toggle button */
-  .music-btn {
+  /* ===== MUSIC PLAYER PANEL ===== */
+  .music-player {
     position: fixed;
     bottom: 80px;
     right: 20px;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    background: var(--dark2);
-    color: var(--gold);
-    border: 2px solid var(--gold);
-    cursor: pointer;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    transition: all 0.3s ease;
     z-index: 100;
   }
 
-  .music-btn:hover {
+  .music-panel {
+    background: rgba(28, 20, 14, 0.92);
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 16px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+
+  .music-play-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
     background: var(--gold);
     color: var(--dark);
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(201,168,76,0.4);
+  }
+
+  .music-play-btn:hover {
+    background: var(--gold-light);
     transform: scale(1.1);
   }
 
-  .music-btn.playing {
+  .music-play-btn.playing {
     animation: music-pulse 1.5s ease-in-out infinite;
   }
 
   @keyframes music-pulse {
-    0%, 100% { box-shadow: 0 4px 12px rgba(201,168,76,0.3); }
-    50%       { box-shadow: 0 4px 20px rgba(201,168,76,0.7); }
+    0%, 100% { box-shadow: 0 2px 8px rgba(201,168,76,0.4); }
+    50%       { box-shadow: 0 2px 18px rgba(201,168,76,0.85); }
+  }
+
+  .music-label {
+    font-size: 11px;
+    color: var(--gold-light);
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    font-weight: 300;
+  }
+
+  .volume-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .vol-icon {
+    font-size: 13px;
+    color: var(--gold);
+    user-select: none;
+    flex-shrink: 0;
+  }
+
+  input[type=range].vol-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 70px;
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(to right, var(--gold) 35%, rgba(201,168,76,0.25) 35%);
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type=range].vol-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--gold-light);
+    cursor: pointer;
+    box-shadow: 0 0 4px rgba(0,0,0,0.4);
+  }
+
+  input[type=range].vol-slider::-moz-range-thumb {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--gold-light);
+    cursor: pointer;
+    border: none;
   }
 
   /* Header */
@@ -521,8 +587,18 @@
 
 <button class="admin-btn" onclick="goToAdmin()" title="Quản lý danh sách">⚙️</button>
 
-<!-- Nút bật/tắt nhạc -->
-<button class="music-btn" id="musicBtn" onclick="toggleMusic()" title="Bật/tắt nhạc">🎵</button>
+<!-- Music Player Panel -->
+<div class="music-player">
+  <div class="music-panel">
+    <button class="music-play-btn" id="musicBtn" onclick="toggleMusic()" title="Bật/tắt nhạc">▶</button>
+    <span class="music-label">🎵 Nhạc nền</span>
+    <div class="volume-wrap">
+      <span class="vol-icon">🔈</span>
+      <input type="range" class="vol-slider" id="volSlider" min="0" max="100" value="35" oninput="changeVolume(this.value)" />
+      <span class="vol-icon">🔊</span>
+    </div>
+  </div>
+</div>
 
 <!-- Nhạc nền (dùng link nhạc free royalty-free) -->
 <audio id="bgMusic" loop>
@@ -554,16 +630,14 @@ function enterSite() {
   const audio = document.getElementById('bgMusic');
   const btn = document.getElementById('musicBtn');
 
-  // Phát nhạc
+  // Phát nhạc ngay khi bấm
   if (!musicStarted) {
     audio.volume = 0.35;
     audio.play().then(() => {
       musicStarted = true;
       btn.classList.add('playing');
-      btn.textContent = '🎶';
-    }).catch(() => {
-      // Nếu bị block thì thôi
-    });
+      btn.textContent = '⏸';
+    }).catch(() => {});
   }
 
   // Ẩn splash
@@ -578,12 +652,22 @@ function toggleMusic() {
   if (audio.paused) {
     audio.play();
     btn.classList.add('playing');
-    btn.textContent = '🎶';
+    btn.textContent = '⏸';
   } else {
     audio.pause();
     btn.classList.remove('playing');
-    btn.textContent = '🎵';
+    btn.textContent = '▶';
   }
+}
+
+// ===== CHỈNH ÂM LƯỢNG =====
+function changeVolume(val) {
+  const audio = document.getElementById('bgMusic');
+  const pct = val / 100;
+  audio.volume = pct;
+  // Cập nhật màu thanh slider
+  const slider = document.getElementById('volSlider');
+  slider.style.background = `linear-gradient(to right, var(--gold) ${val}%, rgba(201,168,76,0.25) ${val}%)`;
 }
 
 // ===== DỮ LIỆU & RENDER =====
