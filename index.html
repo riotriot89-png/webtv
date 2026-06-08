@@ -212,6 +212,38 @@
   }
 
   /* Admin button */
+  .discord-btn {
+    position: fixed;
+    bottom: 76px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #5865F2;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(88,101,242,0.45);
+    transition: all 0.3s ease;
+    z-index: 100;
+    text-decoration: none;
+  }
+
+  .discord-btn:hover {
+    background: #4752C4;
+    transform: scale(1.1);
+    box-shadow: 0 6px 18px rgba(88,101,242,0.6);
+  }
+
+  .discord-btn svg {
+    width: 26px;
+    height: 26px;
+    fill: #fff;
+  }
+
   .admin-btn {
     position: fixed;
     bottom: 20px;
@@ -585,6 +617,10 @@
 
 </div>
 
+<a class="discord-btn" href="https://discord.gg/YUZYA2Yj" target="_blank" rel="noopener" title="Tham gia Discord Server">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.317 4.492c-1.53-.69-3.17-1.2-4.885-1.49a.075.075 0 0 0-.079.036c-.21.369-.444.85-.608 1.23a18.566 18.566 0 0 0-5.487 0 12.36 12.36 0 0 0-.617-1.23A.077.077 0 0 0 8.562 3c-1.714.29-3.354.8-4.885 1.491a.07.07 0 0 0-.032.027C.533 9.093-.32 13.555.099 17.961a.08.08 0 0 0 .031.055 20.03 20.03 0 0 0 5.993 2.98.078.078 0 0 0 .084-.026 13.83 13.83 0 0 0 1.226-1.963.074.074 0 0 0-.041-.104 13.175 13.175 0 0 1-1.872-.878.075.075 0 0 1-.008-.125c.126-.093.252-.19.372-.287a.075.075 0 0 1 .078-.01c3.927 1.764 8.18 1.764 12.061 0a.075.075 0 0 1 .079.009c.12.098.245.195.372.288a.075.075 0 0 1-.006.125c-.598.344-1.22.635-1.873.877a.075.075 0 0 0-.041.105c.36.687.772 1.341 1.225 1.962a.077.077 0 0 0 .084.028 19.963 19.963 0 0 0 6.002-2.981.076.076 0 0 0 .032-.054c.5-5.094-.838-9.52-3.549-13.442a.06.06 0 0 0-.031-.028zM8.02 15.278c-1.182 0-2.157-1.069-2.157-2.38 0-1.312.956-2.38 2.157-2.38 1.21 0 2.176 1.077 2.157 2.38 0 1.312-.956 2.38-2.157 2.38zm7.975 0c-1.183 0-2.157-1.069-2.157-2.38 0-1.312.955-2.38 2.157-2.38 1.21 0 2.176 1.077 2.157 2.38 0 1.312-.946 2.38-2.157 2.38z"/></svg>
+</a>
+
 <button class="admin-btn" onclick="goToAdmin()" title="Quản lý danh sách">⚙️</button>
 
 <!-- Music Player Panel -->
@@ -680,7 +716,7 @@ const MEMBERS = [
   { id: 1, name: "Phải Lòng Em Khác", image: "https://cdn.discordapp.com/guilds/1426866917917851680/users/605428359836598312/avatars/3c5a5e777512491ce0175211fb206dec.png?size=4096" },
   { id: 2, name: "Phải Làm Em Khóc", image: "https://cdn.discordapp.com/avatars/1326881505808617472/922ed07d407f4a9accd34d2c19319cba.png?size=4096" },
   { id: 3, name: "Hiền Và Nhiều Tài", image: "https://cdn.discordapp.com/guilds/1426866917917851680/users/1223521140761165888/avatars/194d8767abe6361e9a12a4e863ce7c3b.png?size=4096" },
-
+  { id: 4, name: "Kitty", image: "https://cdn.discordapp.com/attachments/1513612087388016872/1513612185736052816/z7800010272546_eeedbce4a70124cfa23e04c9a2ceea1c.jpg?ex=6a285cb2&is=6a270b32&hm=b7e72e3986d3b23e9c5fdde54caf74bdfc9018d4c7e65cdc469bb285cf1ec126&" },
 ];
 
 function getHonorees() {
