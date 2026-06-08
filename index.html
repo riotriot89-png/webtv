@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bảng Vinh Danh</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Be+Vietnam+Pro:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #F0D080;
+    --gold-pale: #FDF6E3;
+    --dark: #1A1410;
+    --dark2: #2C2318;
+    --cream: #FAF5EA;
+    --text: #3A2E1E;
+    --muted: #8A7A5E;
+  }
+
+  body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(201,168,76,0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(201,168,76,0.08) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 24px 80px;
+  }
+
+  /* Admin button */
+  .admin-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--dark);
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    z-index: 100;
+  }
+
+  .admin-btn:hover {
+    background: var(--gold-light);
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+
+  .header-ornament {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .ornament-line {
+    flex: 1;
+    max-width: 120px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold));
+  }
+  .ornament-line.right {
+    background: linear-gradient(to left, transparent, var(--gold));
+  }
+
+  .ornament-star {
+    color: var(--gold);
+    font-size: 22px;
+    letter-spacing: 6px;
+  }
+
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 700;
+    color: var(--dark);
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+  }
+
+  .header h1 span {
+    color: var(--gold);
+  }
+
+  .header-sub {
+    margin-top: 12px;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* Divider */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 48px 0;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.3;
+  }
+  .divider-diamond {
+    width: 8px;
+    height: 8px;
+    background: var(--gold);
+    transform: rotate(45deg);
+    opacity: 0.7;
+  }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 36px 24px;
+  }
+
+  /* Person card */
+  .person {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .person:nth-child(1) { animation-delay: 0.05s; }
+  .person:nth-child(2) { animation-delay: 0.10s; }
+  .person:nth-child(3) { animation-delay: 0.15s; }
+  .person:nth-child(4) { animation-delay: 0.20s; }
+  .person:nth-child(5) { animation-delay: 0.25s; }
+  .person:nth-child(6) { animation-delay: 0.30s; }
+  .person:nth-child(7) { animation-delay: 0.35s; }
+  .person:nth-child(8) { animation-delay: 0.40s; }
+  .person:nth-child(9) { animation-delay: 0.45s; }
+  .person:nth-child(10) { animation-delay: 0.50s; }
+  .person:nth-child(11) { animation-delay: 0.55s; }
+  .person:nth-child(12) { animation-delay: 0.60s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .avatar-wrap {
+    position: relative;
+  }
+
+  /* Gold ring */
+  .avatar-ring {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold), #8B6914, var(--gold-light));
+    background-size: 200% 200%;
+    animation: shimmer 4s ease infinite;
+    transition: transform 0.3s ease;
+  }
+
+  .person:hover .avatar-ring {
+    transform: scale(1.06);
+  }
+
+  @keyframes shimmer {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .avatar-ring img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    background: var(--gold-pale);
+  }
+
+  /* Fallback avatar (initials) */
+  .avatar-fallback {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--dark2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    color: var(--gold-light);
+    font-weight: 700;
+    letter-spacing: 1px;
+    user-select: none;
+  }
+
+  .person-name {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--dark);
+    text-align: center;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+  }
+
+  /* Footer note */
+  .footer {
+    margin-top: 72px;
+    text-align: center;
+  }
+
+  .footer p {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 300;
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .grid {
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 28px 16px;
+    }
+    .avatar-ring { width: 80px; height: 80px; }
+    .avatar-fallback { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header class="header">
+    <div class="header-ornament">
+      <div class="ornament-line"></div>
+      <div class="ornament-star">★ ★ ★</div>
+      <div class="ornament-line right"></div>
+    </div>
+    <h1>Bảng <span>Vinh Danh</span></h1>
+    <p class="header-sub">Tri ân những đóng góp xuất sắc — Năm 2025</p>
+  </header>
+
+  <div class="divider"><div class="divider-diamond"></div></div>
+
+  <div class="grid" id="honorees"></div>
+
+  <div class="divider" style="margin-top:64px"><div class="divider-diamond"></div></div>
+
+  <footer class="footer">
+    <p>Cảm ơn vì sự cống hiến tận tâm &nbsp;·&nbsp; 2025</p>
+  </footer>
+
+</div>
+
+<button class="admin-btn" onclick="goToAdmin()" title="Quản lý danh sách">⚙️</button>
+
+<script>
+// Dữ liệu mặc định
+const DEFAULT_DATA = [
+  { id: 1, name: "Nguyễn Minh An" },
+  { id: 2, name: "Trần Bảo Long" },
+  { id: 3, name: "Lê Thu Châu" },
+  { id: 4, name: "Phạm Đức Khải" },
+  { id: 5, name: "Hoàng Mai Em" },
+  { id: 6, name: "Vũ Gia Nguyên" },
+  { id: 7, name: "Đỗ Hải Triều" },
+  { id: 8, name: "Ngô Kim Liên" },
+  { id: 9, name: "Bùi Mạnh Quân" },
+  { id: 10, name: "Đinh Ngọc Phước" },
+  { id: 11, name: "Lý Thanh Hà" },
+  { id: 12, name: "Trương Xuân Dũng" }
+];
+
+// Lấy dữ liệu từ localStorage
+function getHonorees() {
+  const saved = localStorage.getItem('honorees');
+  if (!saved) {
+    localStorage.setItem('honorees', JSON.stringify(DEFAULT_DATA));
+    return DEFAULT_DATA;
+  }
+  return JSON.parse(saved);
+}
+
+// Hiển thị danh sách
+function renderHonorees() {
+  const data = getHonorees();
+  const container = document.getElementById('honorees');
+  container.innerHTML = '';
+  
+  data.forEach(person => {
+    const initials = person.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    
+    const personDiv = document.createElement('div');
+    personDiv.className = 'person';
+    personDiv.innerHTML = `
+      <div class="avatar-wrap">
+        <div class="avatar-ring">
+          ${person.image ? `<img src="${person.image}" alt="${person.name}">` : `<div class="avatar-fallback">${initials}</div>`}
+        </div>
+      </div>
+      <div class="person-name">${person.name}</div>
+    `;
+    container.appendChild(personDiv);
+  });
+}
+
+function goToAdmin() {
+  window.location.href = 'admin.html';
+}
+
+// Khởi tạo
+renderHonorees();
+</script>
+
+</body>
+</html>

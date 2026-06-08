@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Quản lý - Bảng Vinh Danh</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Be+Vietnam+Pro:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #F0D080;
+    --dark: #1A1410;
+    --dark2: #2C2318;
+    --cream: #FAF5EA;
+    --text: #3A2E1E;
+    --muted: #8A7A5E;
+    --error: #C84B31;
+    --success: #4CAF50;
+  }
+
+  body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+
+  /* ========== LOGIN SCREEN ========== */
+  .login-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--dark) 0%, var(--dark2) 100%);
+  }
+
+  .login-box {
+    background: var(--cream);
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    max-width: 350px;
+    width: 100%;
+  }
+
+  .login-box h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    color: var(--dark);
+    margin-bottom: 10px;
+  }
+
+  .login-box p {
+    color: var(--muted);
+    margin-bottom: 30px;
+    font-size: 14px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .form-group input {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--gold);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: white;
+    transition: border-color 0.3s;
+  }
+
+  .form-group input:focus {
+    outline: none;
+    border-color: var(--gold-light);
+    box-shadow: 0 0 8px rgba(201, 168, 76, 0.3);
+  }
+
+  .btn {
+    padding: 12px 32px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .btn-primary {
+    background: var(--gold);
+    color: var(--dark);
+    width: 100%;
+  }
+
+  .btn-primary:hover {
+    background: var(--gold-light);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(201, 168, 76, 0.3);
+  }
+
+  .error-message {
+    background: var(--error);
+    color: white;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+
+  /* ========== ADMIN SCREEN ========== */
+  .admin-screen {
+    display: none;
+  }
+
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+    border-bottom: 2px solid var(--gold);
+    padding-bottom: 20px;
+  }
+
+  .admin-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    color: var(--dark);
+  }
+
+  .btn-logout {
+    background: var(--muted);
+    color: white;
+    padding: 8px 16px;
+    font-size: 12px;
+  }
+
+  .btn-logout:hover {
+    background: var(--text);
+  }
+
+  /* Add form */
+  .add-section {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    margin-bottom: 40px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .add-section h2 {
+    font-size: 18px;
+    color: var(--dark);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .add-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 12px;
+    align-items: flex-end;
+  }
+
+  .add-form input {
+    padding: 10px;
+    border: 1px solid var(--gold);
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 13px;
+  }
+
+  .add-form input:focus {
+    outline: none;
+    border-color: var(--gold-light);
+  }
+
+  .btn-add {
+    background: var(--success);
+    color: white;
+    padding: 10px 24px;
+    font-size: 12px;
+  }
+
+  .btn-add:hover {
+    background: #45a049;
+  }
+
+  /* List */
+  .list-section {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .list-section h2 {
+    font-size: 18px;
+    color: var(--dark);
+    margin-bottom: 20px;
+  }
+
+  .person-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid #e0d5c7;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    align-items: center;
+    background: #fafafa;
+  }
+
+  .person-item-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .person-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dark);
+    font-weight: 700;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .person-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .person-info-name {
+    font-weight: 500;
+    color: var(--dark);
+  }
+
+  .person-info-id {
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .person-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .btn-edit, .btn-delete {
+    padding: 6px 12px;
+    font-size: 11px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-edit {
+    background: var(--gold);
+    color: var(--dark);
+  }
+
+  .btn-edit:hover {
+    background: var(--gold-light);
+  }
+
+  .btn-delete {
+    background: var(--error);
+    color: white;
+  }
+
+  .btn-delete:hover {
+    background: #a83a20;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+  }
+
+  /* Modal */
+  .modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal.active {
+    display: flex;
+  }
+
+  .modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  .modal-header {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 20px;
+  }
+
+  .modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .modal-form input {
+    padding: 10px;
+    border: 1px solid var(--gold);
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 13px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .btn-confirm {
+    background: var(--success);
+    color: white;
+    flex: 1;
+  }
+
+  .btn-confirm:hover {
+    background: #45a049;
+  }
+
+  .btn-cancel {
+    background: var(--muted);
+    color: white;
+    flex: 1;
+  }
+
+  .btn-cancel:hover {
+    background: var(--text);
+  }
+
+  /* Notification */
+  .notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 16px 24px;
+    border-radius: 6px;
+    font-size: 13px;
+    z-index: 2000;
+    animation: slideIn 0.3s ease, slideOut 0.3s ease 2.7s forwards;
+  }
+
+  .notification.success {
+    background: var(--success);
+    color: white;
+  }
+
+  .notification.error {
+    background: var(--error);
+    color: white;
+  }
+
+  @keyframes slideIn {
+    from { transform: translateX(400px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  @keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(400px); opacity: 0; }
+  }
+
+  @media (max-width: 768px) {
+    .add-form {
+      grid-template-columns: 1fr;
+    }
+
+    .person-item {
+      grid-template-columns: 1fr;
+    }
+
+    .admin-header {
+      flex-direction: column;
+      gap: 16px;
+      align-items: flex-start;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <h1>🔐 Quản lý</h1>
+    <p>Nhập mật khẩu để truy cập</p>
+    <div id="errorMessage"></div>
+    <form onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>Mật khẩu</label>
+        <input type="password" id="passwordInput" placeholder="Nhập mật khẩu..." required>
+      </div>
+      <button type="submit" class="btn btn-primary">Đăng nhập</button>
+    </form>
+  </div>
+</div>
+
+<!-- ADMIN SCREEN -->
+<div class="admin-screen" id="adminScreen">
+  <div class="container">
+    <div class="admin-header">
+      <h1>⚙️ Quản lý Vinh Danh</h1>
+      <button class="btn btn-logout" onclick="handleLogout()">Đăng xuất</button>
+    </div>
+
+    <!-- Add Section -->
+    <div class="add-section">
+      <h2>➕ Thêm người mới</h2>
+      <div class="add-form">
+        <input type="text" id="inputName" placeholder="Tên đầy đủ" required>
+        <input type="text" id="inputImage" placeholder="URL ảnh (tùy chọn)">
+        <button type="button" class="btn btn-add" onclick="handleAddPerson()">Thêm</button>
+      </div>
+    </div>
+
+    <!-- List Section -->
+    <div class="list-section">
+      <h2>👥 Danh sách hiện tại</h2>
+      <div id="personList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal" id="editModal">
+  <div class="modal-content">
+    <div class="modal-header">Chỉnh sửa thông tin</div>
+    <div class="modal-form">
+      <input type="hidden" id="editId">
+      <input type="text" id="editName" placeholder="Tên đầy đủ">
+      <input type="text" id="editImage" placeholder="URL ảnh (tùy chọn)">
+      <div class="modal-actions">
+        <button type="button" class="btn btn-confirm" onclick="handleSaveEdit()">Lưu</button>
+        <button type="button" class="btn btn-cancel" onclick="closeModal()">Hủy</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== CONFIG =====
+const ADMIN_PASSWORD = 'admin123'; // ⚠️ Thay đổi mật khẩu này
+const SESSION_KEY = 'admin_session';
+const SESSION_TIMEOUT = 30 * 60 * 1000; // 30 phút
+
+// ===== FUNCTIONS =====
+
+function handleLogin(e) {
+  e.preventDefault();
+  const password = document.getElementById('passwordInput').value;
+  const errorDiv = document.getElementById('errorMessage');
+
+  if (password === ADMIN_PASSWORD) {
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+      loggedIn: true,
+      timestamp: Date.now()
+    }));
+    showAdminScreen();
+  } else {
+    errorDiv.innerHTML = '<div class="error-message">❌ Mật khẩu không chính xác</div>';
+    document.getElementById('passwordInput').value = '';
+  }
+}
+
+function handleLogout() {
+  sessionStorage.removeItem(SESSION_KEY);
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('adminScreen').style.display = 'none';
+  document.getElementById('passwordInput').value = '';
+  document.getElementById('errorMessage').innerHTML = '';
+}
+
+function showAdminScreen() {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminScreen').style.display = 'block';
+  renderPersonList();
+}
+
+function checkSession() {
+  const session = sessionStorage.getItem(SESSION_KEY);
+  if (!session) {
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('adminScreen').style.display = 'none';
+    return false;
+  }
+  
+  const data = JSON.parse(session);
+  if (Date.now() - data.timestamp > SESSION_TIMEOUT) {
+    sessionStorage.removeItem(SESSION_KEY);
+    handleLogout();
+    return false;
+  }
+  
+  return true;
+}
+
+function getHonorees() {
+  const saved = localStorage.getItem('honorees');
+  if (!saved) {
+    return [];
+  }
+  return JSON.parse(saved);
+}
+
+function saveHonorees(data) {
+  localStorage.setItem('honorees', JSON.stringify(data));
+}
+
+function handleAddPerson() {
+  const name = document.getElementById('inputName').value.trim();
+  const image = document.getElementById('inputImage').value.trim();
+
+  if (!name) {
+    showNotification('Vui lòng nhập tên', 'error');
+    return;
+  }
+
+  const honorees = getHonorees();
+  const newId = Math.max(...honorees.map(h => h.id), 0) + 1;
+
+  honorees.push({
+    id: newId,
+    name: name,
+    image: image || ''
+  });
+
+  saveHonorees(honorees);
+  renderPersonList();
+  document.getElementById('inputName').value = '';
+  document.getElementById('inputImage').value = '';
+  showNotification('✅ Thêm thành công!', 'success');
+}
+
+function openEditModal(id) {
+  const honorees = getHonorees();
+  const person = honorees.find(h => h.id === id);
+
+  if (person) {
+    document.getElementById('editId').value = id;
+    document.getElementById('editName').value = person.name;
+    document.getElementById('editImage').value = person.image || '';
+    document.getElementById('editModal').classList.add('active');
+  }
+}
+
+function closeModal() {
+  document.getElementById('editModal').classList.remove('active');
+}
+
+function handleSaveEdit() {
+  const id = parseInt(document.getElementById('editId').value);
+  const name = document.getElementById('editName').value.trim();
+  const image = document.getElementById('editImage').value.trim();
+
+  if (!name) {
+    showNotification('Vui lòng nhập tên', 'error');
+    return;
+  }
+
+  const honorees = getHonorees();
+  const person = honorees.find(h => h.id === id);
+
+  if (person) {
+    person.name = name;
+    person.image = image;
+    saveHonorees(honorees);
+    renderPersonList();
+    closeModal();
+    showNotification('✅ Cập nhật thành công!', 'success');
+  }
+}
+
+function handleDeletePerson(id) {
+  if (confirm('Bạn có chắc chắn muốn xóa?')) {
+    const honorees = getHonorees();
+    const filtered = honorees.filter(h => h.id !== id);
+    saveHonorees(filtered);
+    renderPersonList();
+    showNotification('✅ Xóa thành công!', 'success');
+  }
+}
+
+function renderPersonList() {
+  const honorees = getHonorees();
+  const container = document.getElementById('personList');
+
+  if (honorees.length === 0) {
+    container.innerHTML = '<div class="empty-state">Chưa có người nào. Hãy thêm người mới!</div>';
+    return;
+  }
+
+  container.innerHTML = honorees.map(person => {
+    const initials = person.name.split(' ').map(n => n[0]).join('').slice(0, 2);
+    return `
+      <div class="person-item">
+        <div class="person-item-content">
+          <div class="person-avatar">${initials}</div>
+          <div class="person-info">
+            <div class="person-info-name">${person.name}</div>
+            <div class="person-info-id">ID: ${person.id}</div>
+          </div>
+        </div>
+        <div class="person-actions">
+          <button type="button" class="btn btn-edit" onclick="openEditModal(${person.id})">Sửa</button>
+          <button type="button" class="btn btn-delete" onclick="handleDeletePerson(${person.id})">Xóa</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function showNotification(message, type) {
+  const notif = document.createElement('div');
+  notif.className = `notification ${type}`;
+  notif.textContent = message;
+  document.body.appendChild(notif);
+
+  setTimeout(() => notif.remove(), 3000);
+}
+
+// ===== INIT =====
+window.addEventListener('load', () => {
+  if (checkSession()) {
+    showAdminScreen();
+  }
+});
+
+// Check session every 5 seconds
+setInterval(() => {
+  if (!checkSession() && document.getElementById('adminScreen').style.display !== 'none') {
+    handleLogout();
+  }
+}, 5000);
+
+// Close modal on escape
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+</script>
+
+</body>
+</html>
