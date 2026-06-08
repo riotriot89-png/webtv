@@ -316,7 +316,7 @@
     width: 70px;
     height: 4px;
     border-radius: 2px;
-    background: linear-gradient(to right, var(--gold) 35%, rgba(201,168,76,0.25) 35%);
+    background: linear-gradient(to right, var(--gold) 100%, rgba(201,168,76,0.25) 100%);
     outline: none;
     cursor: pointer;
   }
@@ -594,7 +594,7 @@
     <span class="music-label">🎵 Nhạc nền</span>
     <div class="volume-wrap">
       <span class="vol-icon">🔈</span>
-      <input type="range" class="vol-slider" id="volSlider" min="0" max="100" value="35" oninput="changeVolume(this.value)" />
+      <input type="range" class="vol-slider" id="volSlider" min="0" max="100" value="100" oninput="changeVolume(this.value)" />
       <span class="vol-icon">🔊</span>
     </div>
   </div>
@@ -632,7 +632,9 @@ function enterSite() {
 
   // Phát nhạc ngay khi bấm
   if (!musicStarted) {
-    audio.volume = 0.35;
+    audio.volume = 1.0;
+    document.getElementById('volSlider').value = 100;
+    document.getElementById('volSlider').style.background = `linear-gradient(to right, var(--gold) 100%, rgba(201,168,76,0.25) 100%)`;
     audio.play().then(() => {
       musicStarted = true;
       btn.classList.add('playing');
