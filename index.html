@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ổ Mèo</title>
+<link rel="icon" type="image/svg+xml" href="cat-icon.svg" />
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Be+Vietnam+Pro:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  .person-id { font-size: 0.72rem; color: var(--muted); opacity: 0.7; margin-top: 2px; letter-spacing: 0.01em; }
+
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #F0D080;
+    --gold-pale: #FDF6E3;
+    --dark: #1A1410;
+    --dark2: #2C2318;
+    --cream: #FAF5EA;
+    --text: #3A2E1E;
+    --muted: #8A7A5E;
+  }
+
+  body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ===== GIF BACKGROUND ===== */
+  .bg-gif {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background-image: url('background.gif');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 1.2;
+    pointer-events: none;
+    transition: opacity 1s ease;
+  }
+
+  /* Overlay mờ che trên GIF */
+  .bg-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: rgba(250, 245, 234, 0.5);
+    pointer-events: none;
+  }
+
+  /* Background pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 20% 20%, rgba(201,168,76,0.08) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(201,168,76,0.08) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ===== LOADING / SPLASH SCREEN ===== */
+  #splash {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: var(--dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    cursor: pointer;
+    transition: opacity 0.8s ease, visibility 0.8s ease;
+    overflow: hidden;
+  }
+
+  #splash.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  /* Nền hoa văn splash */
+  #splash::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(circle at 30% 40%, rgba(201,168,76,0.12) 0%, transparent 55%),
+      radial-gradient(circle at 70% 60%, rgba(201,168,76,0.10) 0%, transparent 55%);
+    pointer-events: none;
+  }
+
+  /* Vòng quay ngoài */
+  .spinner-outer {
+    position: relative;
+    width: 140px;
+    height: 140px;
+  }
+
+  .spinner-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3px solid transparent;
+  }
+
+  .spinner-ring-1 {
+    border-top-color: var(--gold-light);
+    border-right-color: var(--gold);
+    animation: spin 1.4s linear infinite;
+  }
+
+  .spinner-ring-2 {
+    inset: 12px;
+    border-bottom-color: var(--gold);
+    border-left-color: rgba(201,168,76,0.4);
+    animation: spin 2s linear infinite reverse;
+  }
+
+  .spinner-ring-3 {
+    inset: 24px;
+    border-top-color: rgba(240,208,128,0.6);
+    animation: spin 2.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Logo ở giữa vòng quay */
+  .spinner-center {
+    position: absolute;
+    inset: 36px;
+    border-radius: 50%;
+    background: var(--dark2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 12px rgba(201,168,76,0.4); }
+    50%       { box-shadow: 0 0 28px rgba(201,168,76,0.8); }
+  }
+
+  .splash-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    color: var(--gold-light);
+    letter-spacing: 0.06em;
+    text-align: center;
+    animation: fadeIn 1.2s ease both;
+  }
+
+  .splash-title span {
+    color: #fff;
+  }
+
+  .splash-tap {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    font-size: 13px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    animation: blink 1.8s ease-in-out infinite, fadeIn 2s ease both;
+    margin-top: -8px;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 0.5; }
+    50%       { opacity: 1; }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Hạt vàng rơi */
+  .particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--gold);
+    opacity: 0;
+    animation: float-particle linear infinite;
+  }
+
+  @keyframes float-particle {
+    0%   { opacity: 0; transform: translateY(100vh) scale(0); }
+    10%  { opacity: 0.8; }
+    90%  { opacity: 0.4; }
+    100% { opacity: 0; transform: translateY(-10vh) scale(1.5); }
+  }
+
+  /* ===== NỘI DUNG CHÍNH ===== */
+  .page {
+    position: relative;
+    z-index: 2;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 60px 24px 80px;
+  }
+
+  /* Admin button */
+  .discord-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    background: #5865F2;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(88,101,242,0.45);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    margin-top: 14px;
+    font-family: 'Be Vietnam Pro', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .discord-btn:hover {
+    background: #4752C4;
+    transform: scale(1.1);
+    box-shadow: 0 6px 18px rgba(88,101,242,0.6);
+  }
+
+  .discord-btn svg {
+    width: 26px;
+    height: 26px;
+    fill: #fff;
+  }
+
+  .admin-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--dark);
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    z-index: 100;
+  }
+
+  .admin-btn:hover {
+    background: var(--gold-light);
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+  }
+
+  /* ===== MUSIC PLAYER PANEL ===== */
+  .music-player {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    z-index: 100;
+  }
+
+  .music-panel {
+    background: rgba(28, 20, 14, 0.92);
+    border: 1px solid rgba(201,168,76,0.4);
+    border-radius: 16px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+  }
+
+  .music-play-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--gold);
+    color: var(--dark);
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(201,168,76,0.4);
+  }
+
+  .music-play-btn:hover {
+    background: var(--gold-light);
+    transform: scale(1.1);
+  }
+
+  .music-play-btn.playing {
+    animation: music-pulse 1.5s ease-in-out infinite;
+  }
+
+  @keyframes music-pulse {
+    0%, 100% { box-shadow: 0 2px 8px rgba(201,168,76,0.4); }
+    50%       { box-shadow: 0 2px 18px rgba(201,168,76,0.85); }
+  }
+
+  .music-label {
+    font-size: 11px;
+    color: var(--gold-light);
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    font-weight: 300;
+  }
+
+  .volume-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .vol-icon {
+    font-size: 13px;
+    color: var(--gold);
+    user-select: none;
+    flex-shrink: 0;
+  }
+
+  input[type=range].vol-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 70px;
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(to right, var(--gold) 100%, rgba(201,168,76,0.25) 100%);
+    outline: none;
+    cursor: pointer;
+  }
+
+  input[type=range].vol-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--gold-light);
+    cursor: pointer;
+    box-shadow: 0 0 4px rgba(0,0,0,0.4);
+  }
+
+  input[type=range].vol-slider::-moz-range-thumb {
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--gold-light);
+    cursor: pointer;
+    border: none;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 64px;
+  }
+
+  .header-ornament {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .ornament-line {
+    flex: 1;
+    max-width: 120px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold));
+  }
+  .ornament-line.right {
+    background: linear-gradient(to left, transparent, var(--gold));
+  }
+
+  .ornament-star {
+    color: var(--gold);
+    font-size: 22px;
+    letter-spacing: 6px;
+  }
+
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 700;
+    color: var(--dark);
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+  }
+
+  .header h1 span {
+    color: var(--gold);
+  }
+
+  .header-sub {
+    margin-top: 12px;
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* Divider */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 48px 0;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.3;
+  }
+  .divider-diamond {
+    width: 8px;
+    height: 8px;
+    background: var(--gold);
+    transform: rotate(45deg);
+    opacity: 0.7;
+  }
+
+  /* Owner / Co-owner section */
+  .leaders-section {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    flex-wrap: wrap;
+    margin-bottom: 48px;
+  }
+
+  .leader-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    min-width: 140px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .leader-slot.empty {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Tag trên đầu avatar */
+  .role-tag {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    z-index: 2;
+  }
+
+  .role-tag.owner {
+    background: linear-gradient(135deg, #C9A84C, #F0D080);
+    color: #1A1410;
+  }
+
+  .role-tag.admin {
+    background: linear-gradient(135deg, #5B8CFF, #9EC5FF);
+    color: #0A0F1A;
+  }
+
+  .role-tag.support {
+    background: linear-gradient(135deg, #4CAF90, #80DFC0);
+    color: #0A1410;
+  }
+
+  /* Role section blocks */
+  .role-section {
+    width: 100%;
+    margin-bottom: 48px;
+  }
+
+  .role-section-title {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .role-section-badge {
+    display: inline-block;
+    padding: 6px 24px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .owner-badge {
+    background: linear-gradient(135deg, #C9A84C, #F0D080);
+    color: #1A1410;
+    box-shadow: 0 0 16px rgba(201,168,76,0.4);
+  }
+
+  .admin-badge {
+    background: linear-gradient(135deg, #5B8CFF, #9EC5FF);
+    color: #0A0F1A;
+    box-shadow: 0 0 16px rgba(91,140,255,0.4);
+  }
+
+  .support-badge {
+    background: linear-gradient(135deg, #4CAF90, #80DFC0);
+    color: #0A1410;
+    box-shadow: 0 0 16px rgba(76,175,144,0.4);
+  }
+
+  /* Avatar lớn hơn cho owner/coowner */
+  .leader-slot .avatar-ring {
+    width: 120px;
+    height: 120px;
+  }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 36px 24px;
+  }
+
+  /* Person card */
+  .person {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .person:nth-child(1)  { animation-delay: 0.05s; }
+  .person:nth-child(2)  { animation-delay: 0.10s; }
+  .person:nth-child(3)  { animation-delay: 0.15s; }
+  .person:nth-child(4)  { animation-delay: 0.20s; }
+  .person:nth-child(5)  { animation-delay: 0.25s; }
+  .person:nth-child(6)  { animation-delay: 0.30s; }
+  .person:nth-child(7)  { animation-delay: 0.35s; }
+  .person:nth-child(8)  { animation-delay: 0.40s; }
+  .person:nth-child(9)  { animation-delay: 0.45s; }
+  .person:nth-child(10) { animation-delay: 0.50s; }
+  .person:nth-child(11) { animation-delay: 0.55s; }
+  .person:nth-child(12) { animation-delay: 0.60s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .avatar-wrap {
+    position: relative;
+  }
+
+  /* Gold ring */
+  .avatar-ring {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    padding: 3px;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold), #8B6914, var(--gold-light));
+    background-size: 200% 200%;
+    animation: shimmer 4s ease infinite;
+    transition: transform 0.3s ease;
+  }
+
+  .person:hover .avatar-ring {
+    transform: scale(1.06);
+  }
+
+  @keyframes shimmer {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  .avatar-ring img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    background: var(--gold-pale);
+  }
+
+  /* Fallback avatar (initials) */
+  .avatar-fallback {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: var(--dark2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    color: var(--gold-light);
+    font-weight: 700;
+    letter-spacing: 1px;
+    user-select: none;
+  }
+
+  .person-name {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--dark);
+    text-align: center;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+  }
+
+  /* Footer note */
+  .footer {
+    margin-top: 72px;
+    text-align: center;
+  }
+
+  .footer p {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 300;
+  }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .grid {
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 28px 16px;
+    }
+    .avatar-ring { width: 80px; height: 80px; }
+    .avatar-fallback { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- GIF Background -->
+<div class="bg-gif" id="bgGif"></div>
+<div class="bg-overlay"></div>
+
+<!-- ===== SPLASH / LOADING SCREEN ===== -->
+<div id="splash" onclick="enterSite()">
+  <!-- Hạt vàng rơi -->
+  <div id="particles"></div>
+
+  <!-- Vòng quay -->
+  <div class="spinner-outer">
+    <div class="spinner-ring spinner-ring-1"></div>
+    <div class="spinner-ring spinner-ring-2"></div>
+    <div class="spinner-ring spinner-ring-3"></div>
+    <div class="spinner-center">🐱</div>
+  </div>
+
+  <!-- Tên trang -->
+  <div class="splash-title"><span>Ổ</span> Mèo</div>
+
+  <!-- Gợi ý nhấn -->
+  <div class="splash-tap">✦ Nhấn để vào trang ✦</div>
+</div>
+
+<!-- ===== NỘI DUNG CHÍNH ===== -->
+<div class="page">
+
+  <header class="header">
+    <div class="header-ornament">
+      <div class="ornament-line"></div>
+      <div class="ornament-star">★ ★ ★</div>
+      <div class="ornament-line right"></div>
+    </div>
+    <h1>Ổ Mèo <span>Prenium</span></h1>
+    <p class="header-sub">Ổ Mèo 2026</p>
+    <a class="discord-btn" href="https://discord.gg/YUZYA2Yj" target="_blank" rel="noopener" title="Tham gia Discord Server">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.317 4.492c-1.53-.69-3.17-1.2-4.885-1.49a.075.075 0 0 0-.079.036c-.21.369-.444.85-.608 1.23a18.566 18.566 0 0 0-5.487 0 12.36 12.36 0 0 0-.617-1.23A.077.077 0 0 0 8.562 3c-1.714.29-3.354.8-4.885 1.491a.07.07 0 0 0-.032.027C.533 9.093-.32 13.555.099 17.961a.08.08 0 0 0 .031.055 20.03 20.03 0 0 0 5.993 2.98.078.078 0 0 0 .084-.026 13.83 13.83 0 0 0 1.226-1.963.074.074 0 0 0-.041-.104 13.175 13.175 0 0 1-1.872-.878.075.075 0 0 1-.008-.125c.126-.093.252-.19.372-.287a.075.075 0 0 1 .078-.01c3.927 1.764 8.18 1.764 12.061 0a.075.075 0 0 1 .079.009c.12.098.245.195.372.288a.075.075 0 0 1-.006.125c-.598.344-1.22.635-1.873.877a.075.075 0 0 0-.041.105c.36.687.772 1.341 1.225 1.962a.077.077 0 0 0 .084.028 19.963 19.963 0 0 0 6.002-2.981.076.076 0 0 0 .032-.054c.5-5.094-.838-9.52-3.549-13.442a.06.06 0 0 0-.031-.028zM8.02 15.278c-1.182 0-2.157-1.069-2.157-2.38 0-1.312.956-2.38 2.157-2.38 1.21 0 2.176 1.077 2.157 2.38 0 1.312-.956 2.38-2.157 2.38zm7.975 0c-1.183 0-2.157-1.069-2.157-2.38 0-1.312.955-2.38 2.157-2.38 1.21 0 2.176 1.077 2.157 2.38 0 1.312-.946 2.38-2.157 2.38z"/></svg>
+      Join Server
+    </a>
+  </header>
+
+  <div class="divider"><div class="divider-diamond"></div></div>
+
+  <!-- Owner section -->
+  <div class="role-section" id="section-owner">
+    <div class="role-section-title"><span class="role-section-badge owner-badge">👑 Owner</span></div>
+    <div class="leaders-section" id="leaders-owner"></div>
+  </div>
+
+  <!-- Admin section -->
+  <div class="role-section" id="section-admin" style="display:none">
+    <div class="role-section-title"><span class="role-section-badge admin-badge">🛡️ Admin</span></div>
+    <div class="grid" id="grid-admin"></div>
+  </div>
+
+  <!-- Support section -->
+  <div class="role-section" id="section-support" style="display:none">
+    <div class="role-section-title"><span class="role-section-badge support-badge">🎧 Support</span></div>
+    <div class="grid" id="grid-support"></div>
+  </div>
+
+  <!-- fallback empty -->
+  <div id="honorees" style="display:none"></div>
+
+  <div class="divider" style="margin-top:64px"><div class="divider-diamond"></div></div>
+
+  <footer class="footer">
+    <p>Ổ MÈO &nbsp;·&nbsp; 2026</p>
+  </footer>
+
+</div>
+
+<button class="admin-btn" onclick="goToAdmin()" title="Quản lý danh sách">⚙️</button>
+
+<!-- Music Player Panel -->
+<div class="music-player">
+  <div class="music-panel">
+    <button class="music-play-btn" id="musicBtn" onclick="toggleMusic()" title="Bật/tắt nhạc">▶</button>
+    <span class="music-label">🎵 Nhạc nền</span>
+    <div class="volume-wrap">
+      <span class="vol-icon">🔈</span>
+      <input type="range" class="vol-slider" id="volSlider" min="0" max="100" value="100" oninput="changeVolume(this.value)" />
+      <span class="vol-icon">🔊</span>
+    </div>
+  </div>
+</div>
+
+<!-- Nhạc nền (dùng link nhạc free royalty-free) -->
+<audio id="bgMusic" loop>
+  <source src="nhac.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+// ===== TẠO HẠT VÀNG RƠI =====
+(function createParticles() {
+  const container = document.getElementById('particles');
+  for (let i = 0; i < 22; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.animationDuration = (4 + Math.random() * 6) + 's';
+    p.style.animationDelay = (Math.random() * 6) + 's';
+    p.style.width = (3 + Math.random() * 5) + 'px';
+    p.style.height = p.style.width;
+    p.style.opacity = (0.4 + Math.random() * 0.6);
+    container.appendChild(p);
+  }
+})();
+
+// ===== VÀO TRANG KHI NHẤN =====
+let musicStarted = false;
+
+function enterSite() {
+  const splash = document.getElementById('splash');
+  const audio = document.getElementById('bgMusic');
+  const btn = document.getElementById('musicBtn');
+
+  // Phát nhạc ngay khi bấm
+  if (!musicStarted) {
+    audio.volume = 1.0;
+    document.getElementById('volSlider').value = 100;
+    document.getElementById('volSlider').style.background = `linear-gradient(to right, var(--gold) 100%, rgba(201,168,76,0.25) 100%)`;
+    audio.play().then(() => {
+      musicStarted = true;
+      btn.classList.add('playing');
+      btn.textContent = '⏸';
+    }).catch(() => {});
+  }
+
+  // Ẩn splash
+  splash.classList.add('hidden');
+}
+
+// ===== BẬT / TẮT NHẠC =====
+function toggleMusic() {
+  const audio = document.getElementById('bgMusic');
+  const btn = document.getElementById('musicBtn');
+
+  if (audio.paused) {
+    audio.play();
+    btn.classList.add('playing');
+    btn.textContent = '⏸';
+  } else {
+    audio.pause();
+    btn.classList.remove('playing');
+    btn.textContent = '▶';
+  }
+}
+
+// ===== CHỈNH ÂM LƯỢNG =====
+function changeVolume(val) {
+  const audio = document.getElementById('bgMusic');
+  const pct = val / 100;
+  audio.volume = pct;
+  // Cập nhật màu thanh slider
+  const slider = document.getElementById('volSlider');
+  slider.style.background = `linear-gradient(to right, var(--gold) ${val}%, rgba(201,168,76,0.25) ${val}%)`;
+}
+
+// ===== DỮ LIỆU THÀNH VIÊN (tự động lấy từ API) =====
+
+const RING_COLORS = {
+  admin:   'rgba(91,140,255,0.55)',
+  support: 'rgba(76,175,144,0.55)',
+};
+
+function makeAvatar(person, roleKey) {
+  const name = person.name || 'Ẩn danh';
+  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  const ringColor = RING_COLORS[roleKey] || '';
+  const ringStyle = ringColor ? `style="box-shadow:0 0 0 3px ${ringColor},0 0 14px ${ringColor}"` : '';
+  return `
+    <div class="avatar-wrap">
+      <div class="avatar-ring" ${ringStyle}>
+        ${person.avatar_url
+          ? `<img src="${person.avatar_url}" alt="${name}">`
+          : `<div class="avatar-fallback">${initials}</div>`}
+      </div>
+    </div>
+    <div class="person-name">${name}</div>
+    <div class="person-id">(${person.discord_id || ''})</div>
+  `;
+}
+
+function renderLeaderSlot(person, roleKey, roleLabel) {
+  const div = document.createElement('div');
+  div.className = 'leader-slot';
+  div.innerHTML = `
+    <div class="avatar-wrap" style="position:relative">
+      <span class="role-tag ${roleKey}">${roleLabel}</span>
+      <div class="avatar-ring">
+        ${person.avatar_url
+          ? `<img src="${person.avatar_url}" alt="${person.name}">`
+          : `<div class="avatar-fallback">${(person.name||'?').slice(0,2).toUpperCase()}</div>`}
+      </div>
+    </div>
+    <div class="person-name">${person.name || 'Ẩn danh'}</div>
+    <div class="person-id">(${person.discord_id || ''})</div>
+  `;
+  return div;
+}
+
+function renderHonorees(members) {
+  if (!members || members.length === 0) {
+    document.getElementById('honorees').style.display = 'block';
+    document.getElementById('honorees').innerHTML = '<p style="color:var(--muted);text-align:center;grid-column:1/-1;padding:40px 0">Chưa có thành viên nào.</p>';
+    return;
+  }
+
+  const groups = {
+    owner:   { label: '👑 Owner',   members: [] },
+    admin:   { label: '🛡️ Admin',   members: [] },
+    support: { label: '🎧 Support', members: [] },
+  };
+
+  members.forEach(m => {
+    const role = m.role || 'support';
+    if (groups[role]) groups[role].members.push(m);
+  });
+
+  // Sort by position
+  Object.values(groups).forEach(g => g.members.sort((a, b) => a.position - b.position));
+
+  // Owner: big leader slots
+  const ownerContainer = document.getElementById('leaders-owner');
+  ownerContainer.innerHTML = '';
+  const secOwner = document.getElementById('section-owner');
+  if (groups.owner.members.length > 0) {
+    secOwner.style.display = '';
+    groups.owner.members.forEach(m => ownerContainer.appendChild(renderLeaderSlot(m, 'owner', '👑 Owner')));
+  } else {
+    secOwner.style.display = 'none';
+  }
+
+  // Admin: grid
+  const adminGrid = document.getElementById('grid-admin');
+  adminGrid.innerHTML = '';
+  const secAdmin = document.getElementById('section-admin');
+  if (groups.admin.members.length > 0) {
+    secAdmin.style.display = '';
+    groups.admin.members.forEach(person => {
+      const div = document.createElement('div');
+      div.className = 'person';
+      div.innerHTML = makeAvatar(person, 'admin');
+      adminGrid.appendChild(div);
+    });
+  } else {
+    secAdmin.style.display = 'none';
+  }
+
+  // Support: grid
+  const supportGrid = document.getElementById('grid-support');
+  supportGrid.innerHTML = '';
+  const secSupport = document.getElementById('section-support');
+  if (groups.support.members.length > 0) {
+    secSupport.style.display = '';
+    groups.support.members.forEach(person => {
+      const div = document.createElement('div');
+      div.className = 'person';
+      div.innerHTML = makeAvatar(person, 'support');
+      supportGrid.appendChild(div);
+    });
+  } else {
+    secSupport.style.display = 'none';
+  }
+}
+
+async function loadMembers() {
+  const container = document.getElementById('honorees');
+  container.innerHTML = '<p style="color:var(--muted);text-align:center;grid-column:1/-1;padding:40px 0">Đang tải...</p>';
+  try {
+    const res = await fetch('/api/members');
+    const data = await res.json();
+    renderHonorees(data.members || []);
+  } catch (err) {
+    container.innerHTML = '<p style="color:var(--muted);text-align:center;grid-column:1/-1;padding:40px 0">Không thể tải danh sách.</p>';
+  }
+}
+
+function goToAdmin() {
+  window.location.href = 'admin.html';
+}
+
+// Khởi tạo
+loadMembers();
+</script>
+
+</body>
+</html>
