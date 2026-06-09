@@ -705,43 +705,46 @@ function changeVolume(val) {
   slider.style.background = `linear-gradient(to right, var(--gold) ${val}%, rgba(201,168,76,0.25) ${val}%)`;
 }
 
-// ===== DỮ LIỆU THÀNH VIÊN =====
-// ✏️ Sửa danh sách thành viên tại đây, sau đó deploy lại là mọi người đều thấy
-// Thêm ảnh: { id: 1, name: "Tên", image: "https://link-anh.jpg" }
-// Không có ảnh: { id: 1, name: "Tên" }
-const MEMBERS = [
-  { id: 1, name: "Phải Lòng Em Khác", image: "https://cdn.discordapp.com/guilds/1426866917917851680/users/605428359836598312/avatars/3c5a5e777512491ce0175211fb206dec.png?size=4096" },
-  { id: 2, name: "Phải Làm Em Khóc", image: "https://cdn.discordapp.com/avatars/1326881505808617472/922ed07d407f4a9accd34d2c19319cba.png?size=4096" },
-  { id: 3, name: "Hiền Và Nhiều Tài", image: "https://cdn.discordapp.com/guilds/1426866917917851680/users/1223521140761165888/avatars/194d8767abe6361e9a12a4e863ce7c3b.png?size=4096" },
-  { id: 4, name: "Kitty", image: "https://cdn.discordapp.com/attachments/1513612087388016872/1513612185736052816/z7800010272546_eeedbce4a70124cfa23e04c9a2ceea1c.jpg?ex=6a285cb2&is=6a270b32&hm=b7e72e3986d3b23e9c5fdde54caf74bdfc9018d4c7e65cdc469bb285cf1ec126&" },
-  { id: 5, name: "Mèo", image: "https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExN2FqdmpsMWh5OTY2bHlwMTRoZWw5NG52aDhpOWF2azg3eHo1cDY3cyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/scpcMQTvUkA7STaA27/giphy.gif" },
-];
+// ===== DỮ LIỆU THÀNH VIÊN (tự động lấy từ API) =====
 
-function getHonorees() {
-  return MEMBERS;
-}
-
-function renderHonorees() {
-  const data = getHonorees();
+function renderHonorees(members) {
   const container = document.getElementById('honorees');
   container.innerHTML = '';
 
-  data.forEach(person => {
-    const initials = person.name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  if (!members || members.length === 0) {
+    container.innerHTML = '<p style="color:var(--muted);text-align:center;grid-column:1/-1;padding:40px 0">Chưa có thành viên nào.</p>';
+    return;
+  }
+
+  members.forEach(person => {
+    const name = person.name || 'Ẩn danh';
+    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     const personDiv = document.createElement('div');
     personDiv.className = 'person';
     personDiv.innerHTML = `
       <div class="avatar-wrap">
         <div class="avatar-ring">
-          ${person.image
-            ? `<img src="${person.image}" alt="${person.name}">`
+          ${person.avatar_url
+            ? `<img src="${person.avatar_url}" alt="${name}">`
             : `<div class="avatar-fallback">${initials}</div>`}
         </div>
       </div>
-      <div class="person-name">${person.name}</div>
+      <div class="person-name">${name}</div>
     `;
     container.appendChild(personDiv);
   });
+}
+
+async function loadMembers() {
+  const container = document.getElementById('honorees');
+  container.innerHTML = '<p style="color:var(--muted);text-align:center;grid-column:1/-1;padding:40px 0">Đang tải...</p>';
+  try {
+    const res = await fetch('/api/members');
+    const data = await res.json();
+    renderHonorees(data.members || []);
+  } catch (err) {
+    container.innerHTML = '<p style="color:var(--muted);text-align:center;grid-column:1/-1;padding:40px 0">Không thể tải danh sách.</p>';
+  }
 }
 
 function goToAdmin() {
@@ -749,7 +752,7 @@ function goToAdmin() {
 }
 
 // Khởi tạo
-renderHonorees();
+loadMembers();
 </script>
 
 </body>
