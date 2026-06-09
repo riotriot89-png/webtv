@@ -847,8 +847,10 @@ function makeAvatar(person, roleKey) {
           : `<div class="avatar-fallback">${initials}</div>`}
       </div>
     </div>
-    <div class="person-name">${name}</div>
-    <div class="person-id">(${person.username || person.discord_id || ''})</div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+      <div class="person-name">${name}</div>
+      <div class="person-id">(${person.username || person.discord_id || ''})</div>
+    </div>
   `;
 }
 
