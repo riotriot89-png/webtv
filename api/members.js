@@ -29,7 +29,7 @@ export default async function handler(req, res) {
 
   // ── ADD ──────────────────────────────────────────────────────────────────
   if (req.method === "POST" && action === "add") {
-    const { discord_id, name, avatar_url, role } = req.body;
+    const { discord_id, name, username, avatar_url, role } = req.body;
     if (!discord_id) return res.status(400).json({ error: "Thiếu discord_id" });
     if (!name) return res.status(400).json({ error: "Thiếu name" });
     if (!role || !VALID_ROLES.includes(role))
@@ -45,6 +45,7 @@ export default async function handler(req, res) {
     const newMember = {
       discord_id,
       name,
+      username: username || null,
       avatar_url: avatar_url || null,
       role,
       position: sameRole.length + 1,
@@ -56,7 +57,7 @@ export default async function handler(req, res) {
 
   // ── UPDATE (sửa tên / ảnh / role) ─────────────────────────────────────────
   if (req.method === "PATCH" && action === "update") {
-    const { discord_id, name, avatar_url, role } = req.body;
+    const { discord_id, name, username, avatar_url, role } = req.body;
     if (!discord_id) return res.status(400).json({ error: "Thiếu discord_id" });
     if (role && !VALID_ROLES.includes(role))
       return res.status(400).json({ error: "role phải là: owner, admin, hoặc support" });
@@ -66,6 +67,7 @@ export default async function handler(req, res) {
     if (idx === -1) return res.status(404).json({ error: "Không tìm thấy member" });
 
     if (name) members[idx].name = name;
+    if (username !== undefined) members[idx].username = username || null;
     if (avatar_url) members[idx].avatar_url = avatar_url;
     if (role) {
       // đổi role → gán position cuối nhóm mới
