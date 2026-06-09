@@ -447,6 +447,60 @@
     opacity: 0.7;
   }
 
+  /* Owner / Co-owner section */
+  .leaders-section {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    flex-wrap: wrap;
+    margin-bottom: 48px;
+  }
+
+  .leader-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    min-width: 140px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .leader-slot.empty {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Tag trên đầu avatar */
+  .role-tag {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 3px 12px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    z-index: 2;
+  }
+
+  .role-tag.owner {
+    background: linear-gradient(135deg, #C9A84C, #F0D080);
+    color: #1A1410;
+  }
+
+  .role-tag.coowner {
+    background: linear-gradient(135deg, #8A7A5E, #B8A880);
+    color: #1A1410;
+  }
+
+  /* Avatar lớn hơn cho owner/coowner */
+  .leader-slot .avatar-ring {
+    width: 120px;
+    height: 120px;
+  }
+
   /* Grid */
   .grid {
     display: grid;
@@ -612,6 +666,7 @@
 
   <div class="divider"><div class="divider-diamond"></div></div>
 
+  <div class="leaders-section" id="leaders"></div>
   <div class="grid" id="honorees"></div>
 
   <div class="divider" style="margin-top:64px"><div class="divider-diamond"></div></div>
@@ -711,8 +766,25 @@ function changeVolume(val) {
 
 // ===== DỮ LIỆU THÀNH VIÊN (tự động lấy từ API) =====
 
+function makeAvatar(person) {
+  const name = person.name || 'Ẩn danh';
+  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  return `
+    <div class="avatar-wrap">
+      <div class="avatar-ring">
+        ${person.avatar_url
+          ? `<img src="${person.avatar_url}" alt="${name}">`
+          : `<div class="avatar-fallback">${initials}</div>`}
+      </div>
+    </div>
+    <div class="person-name">${name}</div>
+  `;
+}
+
 function renderHonorees(members) {
+  const leaders = document.getElementById('leaders');
   const container = document.getElementById('honorees');
+  leaders.innerHTML = '';
   container.innerHTML = '';
 
   if (!members || members.length === 0) {
@@ -720,21 +792,52 @@ function renderHonorees(members) {
     return;
   }
 
-  members.forEach(person => {
-    const name = person.name || 'Ẩn danh';
-    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
-    const personDiv = document.createElement('div');
-    personDiv.className = 'person';
-    personDiv.innerHTML = `
-      <div class="avatar-wrap">
+  const owner   = members.find(m => m.position === 1);
+  const coowner = members.find(m => m.position === 2);
+  const rest    = members.filter(m => m.position > 2);
+
+  // Render owner slot
+  const ownerDiv = document.createElement('div');
+  ownerDiv.className = 'leader-slot' + (owner ? '' : ' empty');
+  if (owner) {
+    ownerDiv.innerHTML = `
+      <div class="avatar-wrap" style="position:relative">
+        <span class="role-tag owner">👑 Owner</span>
         <div class="avatar-ring">
-          ${person.avatar_url
-            ? `<img src="${person.avatar_url}" alt="${name}">`
-            : `<div class="avatar-fallback">${initials}</div>`}
+          ${owner.avatar_url
+            ? `<img src="${owner.avatar_url}" alt="${owner.name}">`
+            : `<div class="avatar-fallback">${(owner.name||'O').slice(0,2).toUpperCase()}</div>`}
         </div>
       </div>
-      <div class="person-name">${name}</div>
+      <div class="person-name">${owner.name || 'Ẩn danh'}</div>
     `;
+  }
+  leaders.appendChild(ownerDiv);
+
+  // Render co-owner slot (chỉ hiện nếu có)
+  if (coowner) {
+    const coDiv = document.createElement('div');
+    coDiv.className = 'leader-slot';
+    coDiv.innerHTML = `
+      <div class="avatar-wrap" style="position:relative">
+        <span class="role-tag coowner">⭐ Co-owner</span>
+        <div class="avatar-ring">
+          ${coowner.avatar_url
+            ? `<img src="${coowner.avatar_url}" alt="${coowner.name}">`
+            : `<div class="avatar-fallback">${(coowner.name||'C').slice(0,2).toUpperCase()}</div>`}
+        </div>
+      </div>
+      <div class="person-name">${coowner.name || 'Ẩn danh'}</div>
+    `;
+    leaders.appendChild(coDiv);
+  }
+
+  // Render thành viên thường
+  rest.forEach(person => {
+    const name = person.name || 'Ẩn danh';
+    const personDiv = document.createElement('div');
+    personDiv.className = 'person';
+    personDiv.innerHTML = makeAvatar(person);
     container.appendChild(personDiv);
   });
 }
