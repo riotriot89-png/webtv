@@ -7,53 +7,17 @@ const kv = new Redis({
 
 const KV_KEY = "members_list";
 const BOT_SECRET = process.env.BOT_SECRET;
-const GUILD_ID = process.env.GUILD_ID;
-const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN;
 
 function authCheck(req) {
   return req.headers["x-bot-secret"] === BOT_SECRET;
 }
 
-async function fetchDiscordMember(discord_id) {
-  try {
-    const res = await fetch(
-      `https://discord.com/api/v10/guilds/${GUILD_ID}/members/${discord_id}`,
-      { headers: { Authorization: `Bot ${BOT_TOKEN}` } }
-    );
-    if (!res.ok) return null;
-    const data = await res.json();
-
-    const name = data.nick || data.user?.global_name || data.user?.username || "Ẩn danh";
-    let avatar_url = null;
-    if (data.avatar) {
-      avatar_url = `https://cdn.discordapp.com/guilds/${GUILD_ID}/users/${discord_id}/avatars/${data.avatar}.png?size=512`;
-    } else if (data.user?.avatar) {
-      avatar_url = `https://cdn.discordapp.com/avatars/${discord_id}/${data.user.avatar}.png?size=512`;
-    }
-    return { name, avatar_url };
-  } catch {
-    return null;
-  }
-}
-
 export default async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
 
-  // ── GET: fetch realtime tên + avatar từ Discord ──────────────────────────
+  // ── GET: trả thẳng data đã lưu, không fetch Discord ──────────────────────
   if (req.method === "GET") {
-    const stored = (await kv.get(KV_KEY)) || [];
-
-    const members = await Promise.all(
-      stored.map(async (m) => {
-        const live = await fetchDiscordMember(m.discord_id);
-        return {
-          ...m,
-          name: live?.name || m.name || "Ẩn danh",
-          avatar_url: live?.avatar_url || m.avatar_url || null,
-        };
-      })
-    );
-
+    const members = (await kv.get(KV_KEY)) || [];
     return res.status(200).json({ members });
   }
 
@@ -63,26 +27,40 @@ export default async function handler(req, res) {
 
   // ── ADD ──────────────────────────────────────────────────────────────────
   if (req.method === "POST" && action === "add") {
-    const { discord_id } = req.body;
+    const { discord_id, name, avatar_url } = req.body;
     if (!discord_id) return res.status(400).json({ error: "Thiếu discord_id" });
+    if (!name) return res.status(400).json({ error: "Thiếu name" });
 
     const members = (await kv.get(KV_KEY)) || [];
     if (members.find((m) => m.discord_id === discord_id)) {
       return res.status(409).json({ error: "Member đã tồn tại" });
     }
 
-    const live = await fetchDiscordMember(discord_id);
-    if (!live) return res.status(404).json({ error: "Không tìm thấy user trong server" });
-
     const newMember = {
       discord_id,
-      name: live.name,
-      avatar_url: live.avatar_url,
+      name,
+      avatar_url: avatar_url || null,
       position: members.length + 1,
     };
     members.push(newMember);
     await kv.set(KV_KEY, members);
     return res.status(200).json({ success: true, member: newMember });
+  }
+
+  // ── UPDATE (sửa tên / ảnh) ────────────────────────────────────────────────
+  if (req.method === "PATCH" && action === "update") {
+    const { discord_id, name, avatar_url } = req.body;
+    if (!discord_id) return res.status(400).json({ error: "Thiếu discord_id" });
+
+    const members = (await kv.get(KV_KEY)) || [];
+    const idx = members.findIndex((m) => m.discord_id === discord_id);
+    if (idx === -1) return res.status(404).json({ error: "Không tìm thấy member" });
+
+    if (name) members[idx].name = name;
+    if (avatar_url) members[idx].avatar_url = avatar_url;
+
+    await kv.set(KV_KEY, members);
+    return res.status(200).json({ success: true, member: members[idx] });
   }
 
   // ── REMOVE ───────────────────────────────────────────────────────────────
